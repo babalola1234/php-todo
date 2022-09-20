@@ -28,19 +28,19 @@ pipeline {
     }
   
        stage('Execute Unit Tests') {
-      steps {
+        steps {
              sh './vendor/bin/phpunit'
       } 
    }
  }
 
-stage('Code Analysis') {
-  steps {
+    stage('Code Analysis') {
+      steps {
         sh 'phploc app/ --log-csv build/logs/phploc.csv'
 
     }
   }
-  stage('Plot Code Coverage Report') {
+    stage('Plot Code Coverage Report') {
       steps {
 
             plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', csvSeries: [[displayTableFlag: false, exclusionValues: 'Lines of Code (LOC),Comment Lines of Code (CLOC),Non-Comment Lines of Code (NCLOC),Logical Lines of Code (LLOC)                          ', file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], group: 'phploc', numBuilds: '100', style: 'line', title: 'A - Lines of code', yaxis: 'Lines of Code'
