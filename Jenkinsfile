@@ -39,7 +39,7 @@ pipeline {
     }
   }
     
-    stage('Plot Code Coverage Report') {
+   stage('Plot Code Coverage Report') {
       steps {
 
             plot csvFileName: 'plot-396c4a6b-b573-41e5-85d8-73613b2ffffb.csv', csvSeries: [[displayTableFlag: false, exclusionValues: 'Lines of Code (LOC),Comment Lines of Code (CLOC),Non-Comment Lines of Code (NCLOC),Logical Lines of Code (LLOC)                          ', file: 'build/logs/phploc.csv', inclusionFlag: 'INCLUDE_BY_STRING', url: '']], group: 'phploc', numBuilds: '100', style: 'line', title: 'A - Lines of code', yaxis: 'Lines of Code'
@@ -57,13 +57,24 @@ pipeline {
       }
     }
 
-  stage ('Package Artifact') {
-    steps {
+    stage('SonarQube Quality Gate') {
+        environment {
+            scannerHome = tool 'SonarQubeScanner'
+        }
+        steps {
+            withSonarQubeEnv('sonarqube') {
+                sh "${scannerHome}/bin/sonar-scanner"
+            }
+
+        }
+    }
+     stage ('Package Artifact') {
+       steps {
             sh 'zip -qr php-todo.zip ${WORKSPACE}/*'
      }
     }
 
-  stage ('Upload Artifact to Artifactory') {
+    stage ('Upload Artifact to Artifactory') {
           steps {
             script { 
                  def server = Artifactory.server 'artifactory-server'                 
@@ -89,6 +100,7 @@ pipeline {
     }
 
     }
+
   }
  
 }
