@@ -20,7 +20,7 @@ pipeline {
     stage('Prepare Dependencies') {
       steps {
              sh 'mv .env.sample .env'
-             sh 'composer self-update --lock'
+             sh 'composer self-update --rollback'
              sh 'composer install '
              sh 'php artisan migrate'
              sh 'php artisan db:seed'
