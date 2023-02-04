@@ -1,37 +1,20 @@
-FROM php:7.4-cli
-LABEL MAINTAINER = "babaloladeen1@gmail.com"
-USER root
-WORKDIR  /var/www/html
+FROM php:7-apache
+LABEL MAINTAINER babadeen
 
+RUN apt update
+RUN apt install zip git nginx -y
+RUN docker-php-ext-install pdo_mysql mysqli
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    zlib1g-dev \
-    libxml2-dev \
-    libzip-dev \
-    libonig-dev \
-    zip \
-    curl \
-    unzip \
-    && docker-php-ext-configure gd \
-    && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-install mysqli \
-    && docker-php-ext-install zip \
-    && docker-php-source delete
-  
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
-
-
-RUN COMPOSER_ALLOW_SUPERUSER=1
+WORKDIR /var/www/html
 
 COPY . .
+RUN mv /var/www/html/.env.sample /var/www/html/.env
+RUN chmod +x artisan
 
+RUN composer install
+RUN php artisan db:seed
+RUN php artisan key:generate
 
-
-RUN composer install 
-
-
-ENTRYPOINT [ "sh", "serve.sh" ]
+CMD php artisan migrate
+ENTRYPOINT php artisan serve --host 0.0.0.0 --port 5001
